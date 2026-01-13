@@ -11,5 +11,7 @@ else
     QUICKLISP=$HOME/quicklisp
 fi
 
-$SBCL --no-userinit --load $QUICKLISP/setup --load expertmind.lisp 
-curl -d @converted-test-server-data.json http://localhost:9899/decision
+$SBCL --no-userinit --load $QUICKLISP/setup --load ExpertMind.lisp 
+#curl -d @converted-test-server-data.json http://localhost:9899/decision
+curl -d @sample.json http://localhost:9899/decision
+

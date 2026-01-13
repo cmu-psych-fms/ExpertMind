@@ -28,6 +28,7 @@
   graph)            ; vector of WORKFLOW-NODE
 
 (defstruct code-graph
+  code-id           ;
   nodes             ; vector of NODES
   workflow)         ; WORKFLOW
 
@@ -111,9 +112,11 @@
 (defun code-graph-to-plist (cg)
   "Return a plist shaped like the JSON: 
    (:NODES #(<node-plist> ...) :WORKFLOW <workflow-plist>)."
-  (list :NODES
-        (map 'vector #'node-to-plist
-             (code-graph-nodes cg))
+  (list :CODE-ID
+        (code-graph-code-id cg)
+        :NODES
+        (node-to-plist
+        (code-graph-nodes cg))
         :WORKFLOW
         (workflow-to-plist (code-graph-workflow cg))))
 
@@ -147,6 +150,26 @@ return a list of probabilities that sum to 1 using the softmax transform."
          (sum-exp (reduce #'+ exp-list)))
     (mapcar (lambda (e) (/ e sum-exp))
             exp-list)))
+
+(defun alist-probabilities (alist &optional (limit 3))
+  "Given ALIST of (key . activation), optionally limited to LIMIT leading
+   entries, compute probabilities from the activations and return an
+   alist (key . probability)."
+  (let* ((slice (if limit
+                    (subseq alist 0 (min limit (length alist)))
+                    alist))
+         ;; replace NIL activations with 0.0d0 before any numeric work
+         (activations (mapcar (lambda (entry)
+                                (let ((a (cdr entry)))
+                                  (if (numberp a) a 0.0d0)))
+                              slice))
+         (probs (probabilities-from-activations activations)))
+    ;; if probabilities-from-activations can ever return NIL, repair here
+    (setf probs
+          (mapcar (lambda (p)
+                    (if (numberp p) p 0.0d0))
+                  probs))
+    (mapcar #'cons (mapcar #'car slice) probs)))
 
 (defun add-workflow-node (wf node)
   "Append WORKFLOW-NODE to WF's graph vector."
