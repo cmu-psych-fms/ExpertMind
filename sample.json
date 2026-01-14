@@ -1,0 +1,13 @@
+{
+    "code_id": "Start",
+    "embeddings": [
+      {
+        "code_element_id": "00100000",
+        "embedding_id": "1666910873.093342",
+        "address_begin": "1",
+        "address_end": "1",
+        "labels": [],
+        "vector": [1666910873.093342, 0.0, 0.0]
+      }
+    ]
+  }
