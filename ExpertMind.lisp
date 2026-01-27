@@ -1,12 +1,9 @@
 ;;; Copyright (c) 2025 Carnegie Mellon University
-
 (ql:quickload '(:alexandria :iterate :cl-interpol :cl-ppcre :usocket-server :babel
                 :cl-json :bordeaux-threads :local-time :uiop :vom :trivial-backtrace))
 
-(interpol:enable-interpol-syntax :modify-*readtable* t)
-
 (defpackage :expert-mind
-  (:use :common-lisp :alexandria :iterate)
+  (:use :common-lisp :alexandria :iterate :cl-user :common-lisp-user)
   (:local-nicknames (:us :usocket)
                     (:bb :babel)
                     (:js :json)
@@ -18,6 +15,9 @@
   (:export #:run-model))
 
 (in-package :expert-mind)
+
+
+(interpol:enable-interpol-syntax :modify-*readtable* t)
 
 (vom:config :expert-mind :info)
 
@@ -78,18 +78,26 @@
 			   (read in)))
   (actr-time 1))
 
-
 (defun future-model (id time)
   (let ((*package* (find-package :expert-mind)))
     (push id *history*)
+    (vom:debug "Memory is: ~S" (dump-memory))
     (labels ((lags (&optional include-current)
                (let ((tags '(current lag1 lag2)))
-                 (unless include-current
-                   (pop tags))
-                 (mapcar #'list tags *history*))))
+                    (unless include-current
+                        (pop tags))
+                    (mapcar #'list tags *history*))))
+            (vom:debug "Lags are: ~S" (lags))
+            
       (multiple-value-bind (_best-chunk _best-value blend-alist)
-          (blend-vote (lags) 'current)
-        (declare (ignore _best-chunk _best-value))
+          (handler-case
+              (blend-vote (lags) 'current)
+              (error (e) ;This will happen if there are no matching slots to blend over due to no prior memory
+                     (vom:info "Error in blend-vote: ~A~%" e)
+                     ;; return safe fallback values
+                     (values nil nil nil)))
+          (declare (ignore _best-chunk _best-value))
+          (vom:debug "Post-Blend ~S ~S" _best-chunk blend-alist)
         ;; If BLEND-VOTE failed (no chunk / no values), bail out cleanly.
         (when (null blend-alist)
           (learn (lags t))
@@ -111,30 +119,30 @@
           (pop (cddr *history*))
           future)))))
 
-(defun safe-future-model (id time)
-  ;; Defensively normalize TIME.
-  (unless (numberp time)
-    (return-from safe-future-model nil))
-
-  ;; Call the original function in a protected way.
-  (handler-case
-      (let ((result (future-model id time)))
-        ;; Normalize the *shape* of RESULT:
-        ;; - NIL       => no prediction
-        ;; - non-list  => treat as unusable
-        ;; - list of (dst-id . prob): repair NIL probs to 0.0d0.
-        (cond
-          ((null result) nil)
-          ((not (listp result)) nil)
-          (t
-           (mapcar (lambda (entry)
-                     (destructuring-bind (dst-id . p) entry
-                       (cons dst-id (if (numberp p) p 0.0d0))))
-                   result))))
-    ;; If any numeric type error escapes ACT-R, degrade to NIL.
-    (type-error (c)
-      (declare (ignore c))
-      nil)))
+;(defun safe-future-model (id time)
+;  ;; Defensively normalize TIME.
+;  (unless (numberp time)
+;    (return-from safe-future-model nil));
+;
+;  ;; Call the original function in a protected way.
+;  (handler-case
+;      (let ((result (future-model id time)))
+;        ;; Normalize the *shape* of RESULT:
+;        ;; - NIL       => no prediction
+;        ;; - non-list  => treat as unusable
+;        ;; - list of (dst-id . prob): repair NIL probs to 0.0d0.
+;        (cond
+;          ((null result) nil)
+;          ((not (listp result)) nil)
+;          (t
+;           (mapcar (lambda (entry)
+;                     (destructuring-bind (dst-id . p) entry
+;                       (cons dst-id (if (numberp p) p 0.0d0))))
+;                   result))))
+;    ;; If any numeric type error escapes ACT-R, degrade to NIL.
+;    (type-error (c)
+;     (declare (ignore c))
+;      nil)))
 
 (defun time-offset (timestamp)
   (check-type timestamp real)
@@ -148,61 +156,62 @@
     (assert (> result 0))
     result))
 
+(defun initialize-model (task)
+  (reset)
+  (actr-time -1.0)
+  (dolist (chunk-desc 
+           (cdr (assoc task *initial-data* :test #'equalp)))
+    (learn (iter (for (key val) :in chunk-desc)
+                 (collect (list (intern (symbol-name key)
+                                        (find-package :expert-mind))
+                                val)))))
+  (actr-time 1.0)
+  (setf *current-task* task)
+  (setf *history* (list nil nil)))
+
 ;; Basic structs
 (defun run-model (json-plist)
-    (let* ((*package* (find-package :expert-mind))
+    (let* (;(*package* (find-package :expert-mind))
            (cg (make-code-graph :code-id (node-code-id (make-node-from-json json-plist)) 
                                 :nodes (make-node-from-json json-plist) 
                                 :workflow (make-workflow)))
-           )
-                (let* ((nodes (code-graph-nodes cg))
-                       (node  (if (typep nodes 'sequence) (elt nodes 0) nodes))                      
-                       (task (node-code-id node))
-                       (embeddings (node-embeddings node)))
-                      (vom:info "~S" (code-graph-nodes cg))
-                      (reset)
-                      (actr-time -1.0)
-                      (dolist (chunk-desc 
-                               (cdr (assoc task *initial-data* :test #'equalp)))
-                          (learn (iter (for (key val) :in chunk-desc)
-                               (collect (list key val)))));(and val (intern val)))))))
-                      (actr-time 1.0)
-                      (setf *current-task* task)
-                      (setf *history* (list nil nil))             
-                     ;; main loop over embeddings
-      (loop for embedding across embeddings do
-            (let* ((vec (embedding-vector embedding)))
-              ;; guard against bad / empty vectors
-              (when (and vec (typep vec 'sequence)
-                         (> (length vec) 0)
-                         (numberp (elt vec 0)))
-                (let* ((ts     (coerce (elt vec 0) 'double-float))
-                       (offset (time-offset ts)))
-                  (multiple-value-bind (future activations)
-                      (with-activations
-                          (safe-future-model (embedding-code-element-id embedding)
-                                        offset))
-                    (declare (ignore activations))
-                    ;; skip if future-model returned NIL (no chunk / no blend)
-                    (when future
-                      (let* ((wf-node
-                               (make-workflow-node
-                                :src-id  (embedding-code-element-id embedding)
-                                 :targets (map 'vector
-                                              (lambda (entry)
-                                                (destructuring-bind
-                                                   (dst-id . probability)
-                                                    entry
-                                                  (make-target-edge
-                                                   :dst-id dst-id
-                                                   :probability probability)))
-                                              future))))
-                        (add-workflow-node (code-graph-workflow cg) wf-node)
-                      )
-                      )
-                  )))
-                  ))
-                      )
+           (nodes (code-graph-nodes cg))
+           (node  (if (typep nodes 'sequence) (elt nodes 0) nodes))                      
+           (task (node-code-id node))
+           (embeddings (node-embeddings node)))
+          
+          (vom:info "Code Graph Nodes: ~S" (code-graph-nodes cg))
+          (initialize-model task) ;seed model with data
+  
+          ;; main loop over embeddings
+          (loop for embedding across embeddings do
+                (let* ((vec (embedding-vector embedding)))
+                     ;; guard against bad / empty vectors
+                      (when (and vec (typep vec 'sequence)
+                                 (> (length vec) 0)
+                                 (numberp (elt vec 0)))
+                          (let* ((ts     (coerce (elt vec 0) 'double-float))
+                                 (offset (time-offset ts))
+                                 (future (future-model (embedding-code-element-id embedding)
+                                                                   offset))
+                                 )
+                                ;; skip if future-model returned NIL (no chunk / no blend)
+                                (vom:info "Model returns: ~S" future)
+                                (when future
+                                    (let* ((wf-node
+                                            (make-workflow-node
+                                             :src-id  (embedding-code-element-id embedding)
+                                             :targets (map 'vector
+                                                           (lambda (entry)
+                                                                   (destructuring-bind
+                                                                       (dst-id . probability)
+                                                                       entry
+                                                                       (make-target-edge
+                                                                            :dst-id dst-id
+                                                                            :probability probability)))
+                                                           future))))
+                                          (add-workflow-node (code-graph-workflow cg) wf-node)
+                                          ))))))
 
     ;; final result
     (code-graph-to-plist cg)))

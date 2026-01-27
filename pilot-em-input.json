@@ -1,0 +1,276 @@
+{
+  "code_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "embeddings": [
+    {
+      "code_element_id": "c43e0d24-3d1f-4986-93bc-cdc8ff574cbb",
+      "embedding_id": "be5583a7-8173-4663-977f-9365da166829",
+      "address_begin": 5,
+      "address_end": 5,
+      "labels": [
+        "functionDecl",
+        "charArray",
+        "sizeVariable"
+      ],
+      "vector": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ]
+    },
+    {
+      "code_element_id": "c43e0d24-3d1f-4986-93bc-cdc8ff574cbb",
+      "embedding_id": "cb10edf4-a238-4151-b9ab-e198cfe6b135",
+      "address_begin": 6,
+      "address_end": 6,
+      "labels": [
+        "functionCall",
+        "charArray",
+        "sizeVariable",
+        "pointerVariable"
+      ],
+      "vector": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ]
+    },
+    {
+      "code_element_id": "c43e0d24-3d1f-4986-93bc-cdc8ff574cbb",
+      "embedding_id": "e89f7b9b-fcfa-49cd-9eda-054be7979f54",
+      "address_begin": 8,
+      "address_end": 8,
+      "labels": [
+        "functionCall",
+        "charArray",
+        "sizeVariable"
+      ],
+      "vector": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ]
+    },
+    {
+      "code_element_id": "c43e0d24-3d1f-4986-93bc-cdc8ff574cbb",
+      "embedding_id": "9ee63dc9-00b7-48d8-82aa-f8f6b5dbce64",
+      "address_begin": 18,
+      "address_end": 18,
+      "labels": [
+        "bufferVariable",
+        "stackAlloc",
+        "constantSize",
+        "charArray"
+      ],
+      "vector": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ]
+    },
+    {
+      "code_element_id": "c43e0d24-3d1f-4986-93bc-cdc8ff574cbb",
+      "embedding_id": "cff80dba-dc1b-4902-9ae6-e5f34c7c0db9",
+      "address_begin": 20,
+      "address_end": 20,
+      "labels": [
+        "userInput",
+        "bufferVariable",
+        "fgets",
+        "charArray"
+      ],
+      "vector": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ]
+    },
+    {
+      "code_element_id": "c43e0d24-3d1f-4986-93bc-cdc8ff574cbb",
+      "embedding_id": "facda05c-4f6a-4948-8775-4457dde7bfab",
+      "address_begin": 21,
+      "address_end": 21,
+      "labels": [
+        "strlen",
+        "sizeVariable"
+      ],
+      "vector": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ]
+    },
+    {
+      "code_element_id": "c43e0d24-3d1f-4986-93bc-cdc8ff574cbb",
+      "embedding_id": "24449661-1f26-44aa-bc7d-58f6c5395f39",
+      "address_begin": 24,
+      "address_end": 24,
+      "labels": [
+        "functionCall",
+        "bufferVariable",
+        "sizeVariable"
+      ],
+      "vector": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ]
+    },
+    {
+      "code_element_id": "b63f5fc8-200b-4105-aaec-682b4bc20492",
+      "embedding_id": "32dbdc6a-14f1-4bde-a69c-ee70a2bacaec",
+      "address_begin": 5,
+      "address_end": 5,
+      "labels": [
+        "constantDecl",
+        "sizeConstant"
+      ],
+      "vector": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ]
+    },
+    {
+      "code_element_id": "b63f5fc8-200b-4105-aaec-682b4bc20492",
+      "embedding_id": "15521957-75be-4081-8da6-63e1cafd32b4",
+      "address_begin": 7,
+      "address_end": 7,
+      "labels": [
+        "functionDecl",
+        "charArray",
+        "sizeVariable"
+      ],
+      "vector": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ]
+    },
+    {
+      "code_element_id": "b63f5fc8-200b-4105-aaec-682b4bc20492",
+      "embedding_id": "3197cfce-5251-4470-9c3b-6aa11e8eadc1",
+      "address_begin": 9,
+      "address_end": 9,
+      "labels": [
+        "comparison",
+        "sizeVariable",
+        "sizeConstant"
+      ],
+      "vector": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ]
+    },
+    {
+      "code_element_id": "b63f5fc8-200b-4105-aaec-682b4bc20492",
+      "embedding_id": "ab7ad37e-af40-4bbe-91a1-3b8c58a36dbc",
+      "address_begin": 12,
+      "address_end": 12,
+      "labels": [
+        "bufferVariable",
+        "stackAlloc",
+        "sizeConstant"
+      ],
+      "vector": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ]
+    },
+    {
+      "code_element_id": "b63f5fc8-200b-4105-aaec-682b4bc20492",
+      "embedding_id": "85d9672a-f6d6-49e5-a110-8e680b8aca49",
+      "address_begin": 26,
+      "address_end": 26,
+      "labels": [
+        "pointerReturn"
+      ],
+      "vector": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ]
+    },
+    {
+      "code_element_id": "b63f5fc8-200b-4105-aaec-682b4bc20492",
+      "embedding_id": "a4278e6e-5e8f-4fe4-927b-2d96f81fafb2",
+      "address_begin": 13,
+      "address_end": 13,
+      "labels": [
+        "strncpy",
+        "bufferVariable",
+        "sizeVariable",
+        "charArray"
+      ],
+      "vector": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ]
+    },
+    {
+      "code_element_id": "b63f5fc8-200b-4105-aaec-682b4bc20492",
+      "embedding_id": "fd1d106f-ba61-45cb-8d9e-f94dacb2c826",
+      "address_begin": 18,
+      "address_end": 18,
+      "labels": [
+        "functionDecl",
+        "sizeVariable",
+        "charArray"
+      ],
+      "vector": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ]
+    },
+    {
+      "code_element_id": "b63f5fc8-200b-4105-aaec-682b4bc20492",
+      "embedding_id": "fb115571-924e-4c32-ae1d-46d9e52acff1",
+      "address_begin": 22,
+      "address_end": 22,
+      "labels": [
+        "errorCheck"
+      ],
+      "vector": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ]
+    },
+    {
+      "code_element_id": "b63f5fc8-200b-4105-aaec-682b4bc20492",
+      "embedding_id": "d2a592f8-03ca-4dae-825f-d2269f6320e8",
+      "address_begin": 21,
+      "address_end": 21,
+      "labels": [
+        "memoryAllocation",
+        "sizeVariable",
+        "charArray",
+        "pointerVariable"
+      ],
+      "vector": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ]
+    }
+  ]
+}

@@ -141,7 +141,7 @@ API:
   (setf *memory* (make-hash-table :test #'eql)))
 
 (defun create-chunk (description &optional (memory *memory*) (trace *verbose*))
-  (let ((name (if (symbolp description) description (gentemp "MEMORY")))
+  (let ((name (if (symbolp description) description (gensym "MEMORY"))) ;(gentemp "MEMORY")))
         (content (if (symbolp description) nil description)))
     (when trace (format t "Creating Chunk ~A Content ~S.~%" name content))
     (setf (gethash name memory) (make-chunk :name name :content content :creation (get-time)

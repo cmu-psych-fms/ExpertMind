@@ -151,7 +151,7 @@ return a list of probabilities that sum to 1 using the softmax transform."
     (mapcar (lambda (e) (/ e sum-exp))
             exp-list)))
 
-(defun alist-probabilities (alist &optional (limit 3))
+(defun alist-probabilities (alist &optional (limit nil))
   "Given ALIST of (key . activation), optionally limited to LIMIT leading
    entries, compute probabilities from the activations and return an
    alist (key . probability)."
@@ -164,17 +164,27 @@ return a list of probabilities that sum to 1 using the softmax transform."
                                   (if (numberp a) a 0.0d0)))
                               slice))
          (probs (probabilities-from-activations activations)))
-    ;; if probabilities-from-activations can ever return NIL, repair here
-    (setf probs
-          (mapcar (lambda (p)
-                    (if (numberp p) p 0.0d0))
-                  probs))
     (mapcar #'cons (mapcar #'car slice) probs)))
 
 (defun add-workflow-node (wf node)
   "Append WORKFLOW-NODE to WF's graph vector."
   (vector-push-extend node (workflow-graph wf))
   wf)
+
+
+(defun unix-diff-seconds (unix1 unix2)
+  "Return UNIX2 - UNIX1 in seconds as a real number, error if negative."
+  (let* ((sec1  (truncate unix1))
+         (sec2  (truncate unix2))
+         (nsec1 (round (* (- unix1 sec1) 1e9)))
+         (nsec2 (round (* (- unix2 sec2) 1e9)))
+         (t1    (local-time:unix-to-timestamp sec1 :nsec nsec1))
+         (t2    (local-time:unix-to-timestamp sec2 :nsec nsec2))
+         (diff  (local-time:timestamp-difference t2 t1)))
+    (when (minusp diff)
+      (error "Negative time difference: ~A seconds (unix2 < unix1?)" diff))
+    diff))
+
 
 ; Similarity Functions for various list structures including Jaccard similarity for unranked and both Rank-Bias Overlap and Sequential Rank Agreement for ordered lists, and cosine-similarity for numeric lists.
 (defun multiset-jaccard (seq1 seq2 &key (test #'eql))

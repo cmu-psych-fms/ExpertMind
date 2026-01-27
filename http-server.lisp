@@ -59,7 +59,7 @@
             json result)
     result))
 
-(ht:define-easy-handler (decision :uri "/decision") ()
+(ht:define-easy-handler (decision :uri "/predict") ()
   (setf (ht:header-out "Content-Type") "application/json")
   (handler-case
       (let ((json (ht:raw-post-data)))
@@ -106,7 +106,7 @@
         ((not (realp debug)) (setf *debug* t))
         (t (setf debug (clamp (round debug) 0 4))
            (setf *debug* (if (zerop debug) t debug))))
-  (v:config :jh (cond ((null *debug*) :info)
+  (v:config t (cond ((null *debug*) :info)
                       ((integerp *debug*) (make-keyword #?"DEBUG${*debug*}"))
                       (t :debug))))
 
